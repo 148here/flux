@@ -690,7 +690,18 @@ def load_t5(device: str | torch.device = "cuda", max_length: int = 512) -> HFEmb
     # max length 64, 128, 256 and 512 should work (if your sequence is short enough)
     t5_path = os.environ.get("FLUX_T5_PATH", "google/t5-v1_1-xxl")
     print(f"Loading T5 from: {t5_path}")
-    return HFEmbedder(t5_path, max_length=max_length, is_clip=False, torch_dtype=torch.bfloat16).to(device)
+    hf_kwargs = {"torch_dtype": torch.bfloat16}
+    if t5_path == "google/t5-v1_1-xxl":
+        torch_version = torch.__version__.split("+", 1)[0]
+        version_parts = torch_version.split(".")
+        major = int("".join(ch for ch in version_parts[0] if ch.isdigit()) or 0)
+        minor = int("".join(ch for ch in version_parts[1] if ch.isdigit()) or 0) if len(version_parts) > 1 else 0
+        if (major, minor) < (2, 6):
+            # google/t5-v1_1-xxl main only exposes .bin on HF; use the safetensors PR branch on older torch.
+            hf_kwargs["revision"] = "refs/pr/2"
+            hf_kwargs["use_safetensors"] = True
+            print("Torch < 2.6 detected; loading T5 safetensors from revision refs/pr/2", flush=True)
+    return HFEmbedder(t5_path, max_length=max_length, is_clip=False, **hf_kwargs).to(device)
 
 
 def load_clip(device: str | torch.device = "cuda") -> HFEmbedder:

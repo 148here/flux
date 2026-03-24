@@ -43,6 +43,8 @@ export FLUX_CLIP_PATH=/path/to/clip_vit_large_patch14
 
 These paths should point to local Hugging Face model directories containing the tokenizer and model files.
 
+If `FLUX_T5_PATH` is not set and your torch version is older than 2.6, the loader automatically uses the `google/t5-v1_1-xxl` safetensors revision `refs/pr/2` to avoid the upstream `.bin` loading restriction.
+
 ## Config
 
 Edit `debug/config.py`.
