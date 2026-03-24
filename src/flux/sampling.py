@@ -1,5 +1,5 @@
 import math
-from typing import Callable
+from typing import TYPE_CHECKING, Callable
 
 import numpy as np
 import torch
@@ -10,8 +10,10 @@ from torch import Tensor
 from .model import Flux
 from .modules.autoencoder import AutoEncoder
 from .modules.conditioner import HFEmbedder
-from .modules.image_embedders import CannyImageEncoder, DepthImageEncoder, ReduxImageEncoder
 from .util import PREFERED_KONTEXT_RESOLUTIONS
+
+if TYPE_CHECKING:
+    from .modules.image_embedders import CannyImageEncoder, DepthImageEncoder, ReduxImageEncoder
 
 
 def get_noise(
