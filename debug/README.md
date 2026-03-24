@@ -34,6 +34,15 @@ pip install -e ".[torch,gradio]"
 python debug/app.py
 ```
 
+To force fully local text encoders and avoid first-run downloads, you can also set:
+
+```bash
+export FLUX_T5_PATH=/path/to/google_t5_v1_1_xxl
+export FLUX_CLIP_PATH=/path/to/clip_vit_large_patch14
+```
+
+These paths should point to local Hugging Face model directories containing the tokenizer and model files.
+
 ## Config
 
 Edit `debug/config.py`.
