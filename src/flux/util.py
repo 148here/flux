@@ -690,13 +690,13 @@ def load_t5(device: str | torch.device = "cuda", max_length: int = 512) -> HFEmb
     # max length 64, 128, 256 and 512 should work (if your sequence is short enough)
     t5_path = os.environ.get("FLUX_T5_PATH", "google/t5-v1_1-xxl")
     print(f"Loading T5 from: {t5_path}")
-    return HFEmbedder(t5_path, max_length=max_length, torch_dtype=torch.bfloat16).to(device)
+    return HFEmbedder(t5_path, max_length=max_length, is_clip=False, torch_dtype=torch.bfloat16).to(device)
 
 
 def load_clip(device: str | torch.device = "cuda") -> HFEmbedder:
     clip_path = os.environ.get("FLUX_CLIP_PATH", "openai/clip-vit-large-patch14")
     print(f"Loading CLIP from: {clip_path}")
-    return HFEmbedder(clip_path, max_length=77, torch_dtype=torch.bfloat16).to(device)
+    return HFEmbedder(clip_path, max_length=77, is_clip=True, torch_dtype=torch.bfloat16).to(device)
 
 
 def load_ae(name: str, device: str | torch.device = "cuda") -> AutoEncoder:
