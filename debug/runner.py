@@ -1,4 +1,4 @@
-﻿from __future__ import annotations
+from __future__ import annotations
 
 import logging
 from dataclasses import dataclass
@@ -237,6 +237,7 @@ class FluxDebugRunner:
             ),
         }
 
+    @torch.inference_mode()
     def run(
         self,
         request: InferenceRequest,

@@ -683,7 +683,7 @@ def load_flow_model(name: str, device: str | torch.device = "cuda", verbose: boo
         missing, unexpected = model.load_state_dict(lora_sd, strict=False, assign=True)
         if verbose:
             print_load_warning(missing, unexpected)
-    return model
+    return model.eval().requires_grad_(False)
 
 
 def load_t5(device: str | torch.device = "cuda", max_length: int = 512) -> HFEmbedder:
@@ -723,7 +723,7 @@ def load_ae(name: str, device: str | torch.device = "cuda") -> AutoEncoder:
     sd = load_sft(ckpt_path, device=str(device))
     missing, unexpected = ae.load_state_dict(sd, strict=False, assign=True)
     print_load_warning(missing, unexpected)
-    return ae
+    return ae.eval().requires_grad_(False)
 
 
 def optionally_expand_state_dict(model: torch.nn.Module, state_dict: dict) -> dict:

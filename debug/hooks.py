@@ -1,7 +1,9 @@
-﻿from __future__ import annotations
+from __future__ import annotations
 
 import logging
 from collections.abc import Callable
+
+import torch
 
 from flux.model import Flux
 
@@ -76,13 +78,14 @@ class FluxAttentionCapture:
                 self._current_timestep,
                 self.head_mode,
             )
-            raw_attention = compute_image_query_text_key_attention(
-                q=q,
-                k=k,
-                pe=pe,
-                txt_token_count=txt_token_count,
-                head_mode=self.head_mode,
-            )
+            with torch.no_grad():
+                raw_attention = compute_image_query_text_key_attention(
+                    q=q.detach(),
+                    k=k.detach(),
+                    pe=pe.detach(),
+                    txt_token_count=txt_token_count,
+                    head_mode=self.head_mode,
+                )
             self.capture_callback(layer_index, self._current_step, self._current_timestep, raw_attention)
 
         return probe
