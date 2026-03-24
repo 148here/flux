@@ -90,6 +90,7 @@ def run_generation(
     fill_state: dict[str, Any] | None,
     editor_value: Any,
 ):
+    print(f"[debug.app] Generate clicked: mode={mode}", flush=True)
     seed_value = None
     if seed_text.strip():
         seed_value = int(seed_text.strip())
@@ -252,4 +253,5 @@ with gr.Blocks(title="FLUX Debug WebUI") as demo:
 
 if __name__ == "__main__":
     demo.launch()
+
 

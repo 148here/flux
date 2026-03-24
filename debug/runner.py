@@ -77,6 +77,7 @@ class FluxDebugRunner:
     def get_bundle(self, model_name: str) -> ModelBundle:
         key = self._cache_key(model_name)
         if key not in self._model_cache:
+            print(f"[debug.runner] Loading model bundle: name={model_name} device={self.device} offload={self.offload}", flush=True)
             logger.info("Loading model bundle name=%s device=%s offload=%s", model_name, self.device, self.offload)
             t5_max_length = 512 if model_name == config.T2I_MODEL_NAME else 128
             bundle = ModelBundle(
@@ -243,6 +244,7 @@ class FluxDebugRunner:
         editor_value: Any | None = None,
     ) -> dict[str, Any]:
         self._ensure_logging()
+        print(f"[debug.runner] Starting request: mode={request.mode} steps={request.num_steps} guidance={request.guidance}", flush=True)
         model_name = config.T2I_MODEL_NAME if request.mode == "text-to-image" else config.FILL_MODEL_NAME
         bundle = self.get_bundle(model_name)
         active_layers = self._sanitize_layers(bundle.model)
@@ -287,6 +289,7 @@ class FluxDebugRunner:
                 bundle.ae = bundle.ae.cpu()
                 self._maybe_empty_cache()
                 bundle.t5, bundle.clip = bundle.t5.to(self.device), bundle.clip.to(self.device)
+            print("[debug.runner] Preparing text-to-image inputs", flush=True)
             inp = prepare(bundle.t5, bundle.clip, x, prompt=request.prompt)
             timesteps = get_schedule(request.num_steps, inp["img"].shape[1], shift=True)
             if self.offload:
@@ -294,6 +297,7 @@ class FluxDebugRunner:
                 self._maybe_empty_cache()
                 bundle.model = bundle.model.to(self.device)
 
+            print("[debug.runner] Entering denoise loop", flush=True)
             with FluxAttentionCapture(bundle.model, active_layers, active_timesteps, config.HEAD_MODE, capture_callback):
                 x = denoise(bundle.model, **inp, timesteps=timesteps, guidance=request.guidance)
 
@@ -324,6 +328,7 @@ class FluxDebugRunner:
                     bundle.clip.to(self.device),
                     bundle.ae.to(self.device),
                 )
+            print("[debug.runner] Preparing fill inputs", flush=True)
             inp = prepare_fill(
                 bundle.t5,
                 bundle.clip,
@@ -339,6 +344,7 @@ class FluxDebugRunner:
                 self._maybe_empty_cache()
                 bundle.model = bundle.model.to(self.device)
 
+            print("[debug.runner] Entering denoise loop", flush=True)
             with FluxAttentionCapture(bundle.model, active_layers, active_timesteps, config.HEAD_MODE, capture_callback):
                 x = denoise(bundle.model, **inp, timesteps=timesteps, guidance=request.guidance)
 
@@ -347,6 +353,7 @@ class FluxDebugRunner:
                 self._maybe_empty_cache()
                 bundle.ae.decoder.to(x.device)
 
+        print("[debug.runner] Decoding latents", flush=True)
         x = unpack(x.float(), height, width)
         with torch.autocast(device_type=self.device.type, dtype=torch.bfloat16):
             decoded = bundle.ae.decode(x)
