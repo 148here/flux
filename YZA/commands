@@ -1,0 +1,11 @@
+export FLUX_MODEL=<your model path here>
+export FLUX_AE=<your autoencoder path here>
+
+
+streamlit run demo_st_fill.py
+
+
+python -m flux fill \
+  --img_cond_path assets/cup.png \
+  --img_mask_path assets/cup_mask.png \
+  --prompt "a white paper cup"
