@@ -232,3 +232,5 @@ $RECYCLE.BIN/
 output/
 
 models/
+
+debug/runs/
